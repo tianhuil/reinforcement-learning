@@ -1,0 +1,26 @@
+{
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter",
+      "editor.formatOnPaste": false,
+      "editor.formatOnSave": true,
+      "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+      }
+    },
+    "files.exclude": {
+      "**/__pycache__": true,
+      ".ruff_cache": true
+    },
+    "python.linting.enabled": false,
+    "rewrap.autoWrap.enabled": true,
+    "rewrap.wrappingColumn": 88,
+    "rewrap.wholeComment": true,
+  
+    // This allows dmypy to be run in the active interpreter, and not use a version from
+    // PATH (which may not exist)
+    "mypy.runUsingActiveInterpreter": true,
+    "cSpell.words": [
+      "numpy",
+    ]
+  }
