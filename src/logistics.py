@@ -8,7 +8,7 @@ MEDIUM = 1e3
 LARGE = 1e6
 
 
-def _has_palette(arr: np.ndarray | int):
+def has_palette(arr: np.ndarray | int):
     return arr > 0
 
 
@@ -54,18 +54,13 @@ class Port(ABC):
         pass
 
     def reward(self):
-        return -1 * _has_palette(self.state).sum() * LARGE
+        return -1 * has_palette(self.state).sum() * LARGE
 
-    def observation(self):
-        return self.state
-
-    @staticmethod
-    @np.vectorize
     def _generate_palette(self, old_palette: int) -> int:
         """
         Generate a new palette randomly.  If an old palette is present, always return that
         """
-        if _has_palette(old_palette):
+        if has_palette(old_palette):
             return old_palette
 
         if not np.random.choice([True, False], p=[self.prob, 1 - self.prob]):
@@ -78,7 +73,7 @@ class Port(ABC):
         Generate new palettes randomly.  If an old palette is present, always return that
         """
 
-        self.state = self._generate_palette(self.state)
+        self.state = np.vectorize(self._generate_palette)(self.state)
 
 
 class Loading(Port):
@@ -134,8 +129,8 @@ class Logistics(gym.Env):
         self.prob_unloading = prob_unloading
         self.render_mode = render_mode
 
-        self.loading_row = n_rows - 1
-        self.unloading_row = 0
+        self.loading_row = 0
+        self.unloading_row = n_rows - 1
 
         # Port code
         self.loading = Loading(
@@ -175,8 +170,8 @@ class Logistics(gym.Env):
     def _observation(self):
         return {
             "grid": self.grid,
-            "loading": self.loading.observation(),
-            "unloading": self.unloading.observation(),
+            "loading": self.loading.state,
+            "unloading": self.unloading.state,
         }
 
     def _info(self):
@@ -255,3 +250,16 @@ class Logistics(gym.Env):
         self.unloading.generate_palettes()
 
         return self._step_return(reward, False, False)
+
+    @staticmethod
+    def _row_string(row):
+        return " ".join([chr(x + 96) if has_palette(x) else "." for x in row])
+
+    def render(self):
+        if self.render_mode != "console":
+            return
+
+        print("Loading:   ", self._row_string(self.loading.state))
+        for row in range(self.n_rows):
+            print("Grid:      ", self._row_string(self.grid[row, :]))
+        print("Unloading: ", self._row_string(self.unloading.state))
