@@ -1,13 +1,17 @@
-# Copied from https://colab.research.google.com/github/araffin/rl-tutorial-jnrr19/blob/sb3/5_custom_gym_env.ipynb#scrollTo=rYzDXA9vJfz1
-
 import os
 from time import sleep
 
-from src.simple import GoLeftEnv
+from src.logistics import Logistics
 
 DELAY = 0.5
 
-env = GoLeftEnv(grid_size=10)
+env = Logistics(
+    n_rows=4,
+    n_cols=4,
+    palette_types=4,
+    prob_loading=0.05,
+    prob_unloading=0.04,
+)
 
 obs, _ = env.reset()
 env.render()
