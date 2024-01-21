@@ -56,7 +56,7 @@ class Port(ABC):
     def reward(self):
         return -1 * has_palette(self.state).sum() * LARGE
 
-    def _generate_palette(self, old_palette: int) -> int:
+    def _generate_palette(self, old_palette: int, dist: np.ndarray) -> int:
         """
         Generate a new palette randomly.  If an old palette is present, always return that
         """
@@ -65,15 +65,17 @@ class Port(ABC):
 
         if not np.random.choice([True, False], p=[self.prob, 1 - self.prob]):
             return 0
+        if dist.sum() == 0:
+            return 0
 
-        return np.random.choice(range(1, self.palette_types + 1))
+        return np.random.choice(np.arange(1, self.palette_types + 1), p=dist)
 
-    def generate_palettes(self) -> None:
+    def generate_palettes(self, dist: np.ndarray) -> None:
         """
         Generate new palettes randomly.  If an old palette is present, always return that
         """
 
-        self.state = np.vectorize(self._generate_palette)(self.state)
+        self.state = np.vectorize(lambda x: self._generate_palette(x, dist))(self.state)
 
 
 class Loading(Port):
@@ -246,8 +248,18 @@ class Logistics(gym.Env):
         if not success:
             reward -= LARGE
 
-        self.loading.generate_palettes()
-        self.unloading.generate_palettes()
+        flat_dist = np.ones([self.n_cols]) / self.n_cols
+        self.loading.generate_palettes(dist=flat_dist)
+
+        counts = np.maximum(
+            0,
+            (
+                np.bincount(self.grid.ravel(), minlength=self.palette_types + 1)
+                - np.bincount(self.unloading.state, minlength=self.palette_types + 1)
+            )[1:],
+        )
+        dist = counts / counts.sum() if counts.sum() > 0 else np.zeros_like(counts)
+        self.unloading.generate_palettes(dist=dist)
 
         return self._step_return(reward, False, False)
 
