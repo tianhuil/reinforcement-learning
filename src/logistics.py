@@ -235,7 +235,7 @@ class Logistics(gym.Env):
         orig_x, orig_y, direction = action
         dest_x, dest_y = self._destination(orig_x, orig_y, direction)
 
-        if self.valid_coords(orig_x, orig_y):
+        if self.valid_coords(dest_x, dest_y):
             origin, destination, success = move_palette(
                 self.grid[orig_x, orig_y], self.grid[dest_x, dest_y]
             )
