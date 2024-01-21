@@ -235,22 +235,18 @@ class Logistics(gym.Env):
         orig_x, orig_y, direction = action
         dest_x, dest_y = self._destination(orig_x, orig_y, direction)
 
-        if not self.valid_coords(orig_x, orig_y):
-            reward -= SMALL
-            return self._step_return(reward, False, False)
+        if self.valid_coords(orig_x, orig_y):
+            origin, destination, success = move_palette(
+                self.grid[orig_x, orig_y], self.grid[dest_x, dest_y]
+            )
+            self.grid[orig_x, orig_y] = origin
+            self.grid[dest_x, dest_y] = destination
 
-        origin, destination, success = move_palette(
-            self.grid[orig_x, orig_y], self.grid[dest_x, dest_y]
-        )
-        self.grid[orig_x, orig_y] = origin
-        self.grid[dest_x, dest_y] = destination
-
-        if not success:
-            reward -= LARGE
-
+        # Generate Loading Palettes
         flat_dist = np.ones([self.n_cols]) / self.n_cols
         self.loading.generate_palettes(dist=flat_dist)
 
+        # Generate Unloading Palettes
         counts = np.maximum(
             0,
             (
