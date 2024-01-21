@@ -1,4 +1,6 @@
-from src.logistics import Unloading, move_palette
+from gymnasium.utils.env_checker import check_env
+
+from src.logistics import Logistics, Unloading, move_palette
 
 
 def test_transfer():
@@ -13,3 +15,8 @@ def test_unload():
     assert Unloading.unload(0, 0) == (0, 0, False)
     assert Unloading.unload(0, 1) == (0, 1, False)
     assert Unloading.unload(1, 1) == (0, 0, True)
+
+
+def test_check_env():
+    env = Logistics()
+    check_env(env, skip_render_check=True)
