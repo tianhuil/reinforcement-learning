@@ -171,9 +171,9 @@ class Logistics(gym.Env):
 
     def _observation(self):
         return {
-            "grid": tuple(self.grid.ravel()),
-            "loading": tuple(self.loading.state),
-            "unloading": tuple(self.unloading.state),
+            "grid": self.grid.ravel(),
+            "loading": self.loading.state,
+            "unloading": self.unloading.state,
         }
 
     def _info(self):
