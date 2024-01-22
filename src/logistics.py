@@ -3,9 +3,7 @@ from abc import ABC, abstractmethod
 import gymnasium as gym
 import numpy as np
 
-SMALL = 1e0
-MEDIUM = 1e3
-LARGE = 1e6
+LARGE = 1
 
 
 def has_palette(arr: np.ndarray | int):
