@@ -3,7 +3,7 @@ from time import sleep
 
 from src.logistics import Logistics
 
-DELAY = 0.5
+DELAY = 0.3
 
 env = Logistics(
     n_steps=20,
@@ -29,8 +29,7 @@ while True:
     print("reward=", reward, "done=", done)
     env.render()
     if done:
-        print("Goal reached!", "reward=", reward)
-        break
+        env.reset()
     sleep(DELAY)
     os.system("clear")
     step += 1

@@ -134,9 +134,6 @@ class Logistics(gym.Env):
         self.loading_row = 0
         self.unloading_row = n_rows - 1
 
-        # Steps
-        self.remaining_steps = n_steps
-
         # Port code
         self.loading = Loading(
             size=n_cols,
@@ -172,6 +169,7 @@ class Logistics(gym.Env):
         self.grid = np.zeros((self.n_rows, self.n_cols), dtype=np.int_)
         self.loading.reset()
         self.unloading.reset()
+        self.remaining_steps = self.n_steps
 
     def _observation(self):
         return {
