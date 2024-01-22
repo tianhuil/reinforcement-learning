@@ -159,7 +159,7 @@ class Logistics(gym.Env):
         # The grid and loading and unloading can each have a palette or be empty
         self.observation_space = gym.spaces.Dict(
             {
-                "remaining_steps": gym.spaces.Discrete(self.n_steps),
+                "remaining_steps": gym.spaces.Discrete(self.n_steps + 1),
                 "grid": gym.spaces.MultiDiscrete(
                     tuple([self.palette_types + 1] * (n_rows * n_cols))
                 ),
@@ -226,9 +226,6 @@ class Logistics(gym.Env):
     def step(self, action):
         reward = 0.0
 
-        # decrement steps
-        self.remaining_steps -= 1
-
         # Load palettes if we can, penalty if not
         self.grid[self.loading_row, :] = self.loading.step(
             self.grid[self.loading_row, :]
@@ -267,7 +264,10 @@ class Logistics(gym.Env):
         dist = counts / counts.sum() if counts.sum() > 0 else np.zeros_like(counts)
         self.unloading.generate_palettes(dist=dist)
 
-        return self._step_return(reward, False, False)
+        # decrement steps
+        self.remaining_steps -= 1
+
+        return self._step_return(reward, self.remaining_steps <= 0, False)
 
     @staticmethod
     def _row_string(row):
