@@ -115,6 +115,7 @@ class Logistics(gym.Env):
 
     def __init__(
         self,
+        n_steps: int = 1000,  # https://gymnasium.farama.org/tutorials/gymnasium_basics/handling_time_limits/#termination
         n_rows: int = 4,
         n_cols: int = 4,
         palette_types: int = 4,
@@ -123,7 +124,8 @@ class Logistics(gym.Env):
         render_mode="console",
     ):
         super(Logistics, self).__init__()
-        # parameters
+        # Parameters
+        self.n_steps = n_steps
         self.n_rows = n_rows
         self.n_cols = n_cols
         self.palette_types = palette_types
@@ -133,6 +135,9 @@ class Logistics(gym.Env):
 
         self.loading_row = 0
         self.unloading_row = n_rows - 1
+
+        # Steps
+        self.remaining_steps = n_steps
 
         # Port code
         self.loading = Loading(
@@ -154,6 +159,7 @@ class Logistics(gym.Env):
         # The grid and loading and unloading can each have a palette or be empty
         self.observation_space = gym.spaces.Dict(
             {
+                "remaining_steps": gym.spaces.Discrete(self.n_steps),
                 "grid": gym.spaces.MultiDiscrete(
                     tuple([self.palette_types + 1] * (n_rows * n_cols))
                 ),
@@ -171,6 +177,7 @@ class Logistics(gym.Env):
 
     def _observation(self):
         return {
+            "remaining_steps": self.n_steps,
             "grid": self.grid.ravel(),
             "loading": self.loading.state,
             "unloading": self.unloading.state,
@@ -218,6 +225,9 @@ class Logistics(gym.Env):
 
     def step(self, action):
         reward = 0.0
+
+        # decrement steps
+        self.remaining_steps -= 1
 
         # Load palettes if we can, penalty if not
         self.grid[self.loading_row, :] = self.loading.step(
