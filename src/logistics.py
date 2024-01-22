@@ -41,7 +41,7 @@ class Port(ABC):
 
         # The port can have a palette or be empty
         self.observation_space = gym.spaces.MultiDiscrete(
-            (palette_types + 1) * np.ones(self.size, dtype=np.int_)
+            tuple((palette_types + 1) * np.ones(self.size, dtype=np.int_))
         )
 
         self.reset()
@@ -155,7 +155,10 @@ class Logistics(gym.Env):
         self.observation_space = gym.spaces.Dict(
             {
                 "grid": gym.spaces.MultiDiscrete(
-                    (self.palette_types + 1) * np.ones([n_rows, n_cols], dtype=np.int_)
+                    tuple(
+                        (self.palette_types + 1)
+                        * np.ones([n_rows, n_cols], dtype=np.int_)
+                    )
                 ),
                 "loading": self.loading.observation_space,
                 "unloading": self.unloading.observation_space,
