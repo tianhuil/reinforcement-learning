@@ -155,10 +155,7 @@ class Logistics(gym.Env):
         self.observation_space = gym.spaces.Dict(
             {
                 "grid": gym.spaces.MultiDiscrete(
-                    tuple(
-                        (self.palette_types + 1)
-                        * np.ones([n_rows, n_cols], dtype=np.int_)
-                    )
+                    tuple([self.palette_types + 1] * (n_rows * n_cols))
                 ),
                 "loading": self.loading.observation_space,
                 "unloading": self.unloading.observation_space,
