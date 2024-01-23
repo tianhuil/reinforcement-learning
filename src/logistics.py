@@ -66,6 +66,9 @@ class Port(ABC):
         if dist.sum() == 0:
             return 0
 
+        if self.palette_types == 1:
+            return 1
+
         return np.random.choice(np.arange(1, self.palette_types + 1), p=dist)
 
     def generate_palettes(self, dist: np.ndarray) -> None:
