@@ -3,15 +3,15 @@ from time import sleep
 
 from src.logistics import Logistics
 
-DELAY = 0.3
+DELAY = 0.2
 
 env = Logistics(
-    n_steps=20,
-    n_rows=4,
-    n_cols=4,
-    palette_types=4,
-    prob_loading=0.2,
+    n_rows=3,
+    n_cols=2,
+    palette_types=2,
+    prob_loading=0.1,
     prob_unloading=0.2,
+    n_steps=100,
 )
 
 obs, _ = env.reset()
