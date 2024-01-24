@@ -26,3 +26,4 @@ model = A2C(
     "MultiInputPolicy", env, verbose=1, tensorboard_log=f"./data/tb/{id_str}"
 ).learn(200_000)
 model.save(f"./data/model/{id_str}")
+print(f"Model saved under ./data/model/{id_str}")
