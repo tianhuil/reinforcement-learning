@@ -1,0 +1,6 @@
+gymnasium>=0.29.1
+numpy>=1.26.3
+black>=23.12.1
+pytest>=7.4.4
+stable-baselines3[extra]>=2.2.1
+tensorboard
