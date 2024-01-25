@@ -30,7 +30,7 @@ model = Model(
     env,
     verbose=1,
     tensorboard_log=log_dir,
-    learning_rate=2e-3,  # linear_schedule(1e-3, 1e-5),
+    learning_rate=linear_schedule(1e-3, 1e-5),
 ).learn(1_000_000)
 model.save(model_dir)
 print(f"Model saved under {model_dir}")

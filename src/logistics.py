@@ -230,6 +230,9 @@ class Logistics(gym.Env):
             self._info(),
         )
 
+    def _grid_full(self) -> bool:
+        return bool(has_palette(self.grid).sum() == self.n_rows * self.n_cols)
+
     def step(self, action):
         reward = 0.0
 
@@ -278,12 +281,18 @@ class Logistics(gym.Env):
 
         # decrement steps
         self.remaining_steps -= 1
+        terminated = (self.remaining_steps <= 0) or self._grid_full()
 
-        return self._step_return(reward, self.remaining_steps <= 0, False)
+        return self._step_return(reward, terminated, False)
 
     @staticmethod
     def _row_string(row):
         return " ".join([chr(x + 96) if has_palette(x) else "." for x in row])
+
+    @staticmethod
+    def render_action(action):
+        x, y, direction = action
+        return f"[{x} {y}] {['left', 'down', 'right', 'up'][direction]}"
 
     def render(self):
         if self.render_mode != "console":
