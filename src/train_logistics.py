@@ -1,11 +1,10 @@
 import time
 
 from random_word import RandomWords
-from stable_baselines3 import A2C
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.monitor import Monitor
 
-from src.config import new_logistics
+from src.config import Model, new_logistics
 
 r = RandomWords()
 id_str = "{}-{}".format(r.get_random_word(), r.get_random_word())
@@ -15,7 +14,7 @@ check_env(env)
 log_dir = "/tmp/gym/{}".format(int(time.time()))
 env = Monitor(env, log_dir, allow_early_resets=True)
 
-model = A2C(
+model = Model(
     "MultiInputPolicy",
     env,
     verbose=1,

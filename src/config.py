@@ -1,3 +1,5 @@
+from stable_baselines3 import PPO
+
 from src.logistics import Logistics
 
 
@@ -10,3 +12,6 @@ def new_logistics():
         prob_unloading=0.2,
         n_steps=100,
     )
+
+
+Model = PPO

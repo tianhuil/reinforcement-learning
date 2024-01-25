@@ -1,9 +1,7 @@
 import os
 from time import sleep
 
-from stable_baselines3 import A2C
-
-from src.config import new_logistics
+from src.config import Model, new_logistics
 
 DELAY = 0.2
 
@@ -15,7 +13,9 @@ def run_logistics_with_model(model_dir: str | None):
     step = 0
 
     model = (
-        A2C.load(model_dir) if model_dir else A2C("MultiInputPolicy", env, verbose=1)
+        Model.load(model_dir)
+        if model_dir
+        else Model("MultiInputPolicy", env, verbose=1)
     )
 
     while True:
