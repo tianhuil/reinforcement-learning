@@ -3,20 +3,13 @@ from time import sleep
 
 from stable_baselines3 import A2C
 
-from src.logistics import Logistics
+from src.config import new_logistics
 
 DELAY = 0.2
 
 
 def run_logistics_with_model(model_dir: str | None):
-    env = Logistics(
-        n_rows=3,
-        n_cols=2,
-        palette_types=2,
-        prob_loading=0.1,
-        prob_unloading=0.2,
-        n_steps=100,
-    )
+    env = new_logistics()
 
     obs, _ = env.reset()
     step = 0
