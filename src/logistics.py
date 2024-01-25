@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any, Dict
 
 import gymnasium as gym
 import numpy as np
@@ -54,6 +55,9 @@ class Port(ABC):
 
     def reward(self):
         return -1 * has_palette(self.state).sum() * LARGE
+
+    def max_reward(self):
+        return -1 * self.size * LARGE
 
     def _generate_palette(self, old_palette: int, dist: np.ndarray) -> int:
         """
@@ -123,9 +127,11 @@ class Logistics(gym.Env):
         palette_types: int = 4,
         prob_loading: float = 0.05,
         prob_unloading: float = 0.04,
+        early_termination: bool = False,
         render_mode="console",
     ):
         super(Logistics, self).__init__()
+
         # Parameters
         self.n_steps = n_steps
         self.n_rows = n_rows
@@ -133,6 +139,7 @@ class Logistics(gym.Env):
         self.palette_types = palette_types
         self.prob_loading = prob_loading
         self.prob_unloading = prob_unloading
+        self.early_termination = early_termination
         self.render_mode = render_mode
 
         self.loading_row = 0
@@ -281,9 +288,18 @@ class Logistics(gym.Env):
 
         # decrement steps
         self.remaining_steps -= 1
-        terminated = self.remaining_steps <= 0
 
-        return self._step_return(reward, terminated, False)
+        if self.remaining_steps <= 0:
+            return self._step_return(reward, True, False)
+
+        # if grid is full, pretend that we penalize for maximum penalty for remaining steps
+        if self.early_termination and self._grid_full():
+            future_reward = (
+                self.loading.max_reward() + self.unloading.max_reward()
+            ) * self.remaining_steps
+            return self._step_return(reward + future_reward, True, False)
+
+        return self._step_return(reward, False, False)
 
     @staticmethod
     def _row_string(row):
@@ -302,3 +318,15 @@ class Logistics(gym.Env):
         for row in range(self.n_rows):
             print("Grid:      ", self._row_string(self.grid[row, :]))
         print("Unloading: ", self._row_string(self.unloading.state))
+
+    def parameters(self) -> Dict[str, Any]:
+        return {
+            "n_steps": self.n_steps,
+            "n_rows": self.n_rows,
+            "n_cols": self.n_cols,
+            "palette_types": self.palette_types,
+            "prob_loading": self.prob_loading,
+            "prob_unloading": self.prob_unloading,
+            "early_termination": self.early_termination,
+            "render_mode": self.render_mode,
+        }

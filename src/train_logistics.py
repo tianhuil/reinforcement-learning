@@ -1,8 +1,10 @@
 import time
+from typing import Dict
 
 from random_word import RandomWords
-from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
 from stable_baselines3.common.env_checker import check_env
+from stable_baselines3.common.logger import HParam
 from stable_baselines3.common.monitor import Monitor
 
 from src.config import Model, new_logistics
@@ -30,6 +32,41 @@ def linear_schedule(initial_value: float, final_value: float) -> float:
 
 checkpoint_callback = CheckpointCallback(save_freq=STEPS // 5, save_path=model_dir)
 
+
+class HParamCallback(BaseCallback):
+    """
+    Saves the hyperparameters and metrics at the start of the training, and logs them to TensorBoard.
+    """
+
+    def _on_training_start(self) -> None:
+        hparam_dict: Dict[str, str | float] = {
+            "algorithm": self.model.__class__.__name__,
+            **{
+                "optimizer_kwargs_" + key: value
+                for key, value in self.model.policy_kwargs["optimizer_kwargs"].items()
+            },
+            **env.parameters(),
+        }
+        if isinstance(
+            self.model.learning_rate, float
+        ):  # Can also be Schedule, in that case, we don't report
+            hparam_dict["learning rate"] = self.model.learning_rate
+        # define the metrics that will appear in the `HPARAMS` Tensorboard tab by referencing their tag
+        # Tensorbaord will find & display metrics from the `SCALARS` tab
+        metric_dict: Dict[str, float] = {
+            "rollout/ep_len_mean": 0,
+            "rollout/ep_rew_mean": 0,
+        }
+        self.logger.record(
+            "hparams",
+            HParam(hparam_dict, metric_dict),
+            exclude=("stdout", "log", "json", "csv", "optimizer_class"),
+        )
+
+    def _on_step(self) -> bool:
+        return True
+
+
 model = Model(
     "MultiInputPolicy",
     env,
@@ -38,6 +75,6 @@ model = Model(
     learning_rate=linear_schedule(1e-3, 1e-5),
 ).learn(
     STEPS,
-    callback=checkpoint_callback,
+    callback=[checkpoint_callback, HParamCallback()],
 )
 print(f"Model saved under {model_dir}")
