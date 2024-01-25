@@ -4,6 +4,7 @@ import gymnasium as gym
 import numpy as np
 
 LARGE = 1
+SMALL = 1e-3
 
 
 def has_palette(arr: np.ndarray | int):
@@ -174,6 +175,13 @@ class Logistics(gym.Env):
         self.unloading.reset()
         self.remaining_steps = self.n_steps
 
+        # set up initial palette near unloading to 1
+        np.random.choice(range(self.n_cols), size=2)
+        choices = np.random.choice(np.arange(self.n_cols), size=2, replace=False)
+        palette = np.random.choice(np.arange(1, self.palette_types + 1))
+        self.grid[self.unloading_row, choices[0]] = palette
+        self.unloading.state[choices[1]] = palette
+
     def _observation(self):
         return {
             "remaining_steps": self.n_steps,
@@ -247,6 +255,11 @@ class Logistics(gym.Env):
             )
             self.grid[orig_x, orig_y] = origin
             self.grid[dest_x, dest_y] = destination
+
+            if not success:
+                reward -= SMALL
+        else:
+            reward -= SMALL
 
         # Generate Loading Palettes
         flat_dist = np.ones([self.palette_types]) / self.palette_types
