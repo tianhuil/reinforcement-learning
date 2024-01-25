@@ -21,13 +21,16 @@ def run_logistics_with_model(model_dir: str | None):
     while True:
         print(env.observation_space)
         print(env.action_space)
-        action, _ = model.predict(obs, deterministic=True)
-        print(action)
+        action = (
+            model.predict(obs, deterministic=True)[0]
+            if model_dir
+            else model.action_space.sample()
+        )
 
         print(f"Step {step + 1}")
         obs, reward, terminated, truncated, info = env.step(action)
         done = terminated or truncated
-        print("reward=", reward, "done=", done)
+        print("action=", action, "reward=", reward, "done=", done)
         env.render()
         if done:
             env.reset()
