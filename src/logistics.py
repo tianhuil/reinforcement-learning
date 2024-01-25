@@ -4,7 +4,7 @@ import gymnasium as gym
 import numpy as np
 
 LARGE = 1
-SMALL = 1e-3
+SMALL = 1e-1
 
 
 def has_palette(arr: np.ndarray | int):

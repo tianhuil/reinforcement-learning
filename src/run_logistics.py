@@ -6,7 +6,7 @@ from src.config import Model, new_logistics
 DELAY = 0.2
 
 
-def run_logistics_with_model(model_dir: str | None):
+def run_logistics_with_model(model_dir: str | None, input_advance: bool = True):
     env = new_logistics()
 
     obs, _ = env.reset()
@@ -34,7 +34,12 @@ def run_logistics_with_model(model_dir: str | None):
         env.render()
         if done:
             env.reset()
-        sleep(DELAY)
+
+        if input_advance:
+            input("Press any key to continue...")
+        else:
+            sleep(DELAY)
+
         os.system("clear")
         step += 1
 
