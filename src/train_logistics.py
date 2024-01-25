@@ -1,10 +1,13 @@
 import time
 
 from random_word import RandomWords
+from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.monitor import Monitor
 
 from src.config import Model, new_logistics
+
+STEPS = 1_00_000
 
 timestamp = int(time.time())
 timestamp_base64 = f"{timestamp:b}"
@@ -25,12 +28,16 @@ def linear_schedule(initial_value: float, final_value: float) -> float:
     return f
 
 
+checkpoint_callback = CheckpointCallback(save_freq=STEPS // 5, save_path=model_dir)
+
 model = Model(
     "MultiInputPolicy",
     env,
     verbose=1,
     tensorboard_log=log_dir,
     learning_rate=linear_schedule(1e-3, 1e-5),
-).learn(1_000_000)
-model.save(model_dir)
+).learn(
+    STEPS,
+    callback=checkpoint_callback,
+)
 print(f"Model saved under {model_dir}")
