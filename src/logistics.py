@@ -249,7 +249,7 @@ class Logistics(gym.Env):
             self.grid[dest_x, dest_y] = destination
 
         # Generate Loading Palettes
-        flat_dist = np.ones([self.n_cols]) / self.n_cols
+        flat_dist = np.ones([self.palette_types]) / self.palette_types
         self.loading.generate_palettes(dist=flat_dist)
 
         # Generate Unloading Palettes
