@@ -1,4 +1,4 @@
-from stable_baselines3 import PPO
+from stable_baselines3 import A2C
 
 from src.logistics import Logistics
 
@@ -10,8 +10,8 @@ def new_logistics():
         palette_types=2,
         prob_loading=0.1,
         prob_unloading=0.2,
-        n_steps=100,
+        n_steps=50,
     )
 
 
-Model = PPO
+Model = A2C
