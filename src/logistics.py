@@ -281,7 +281,7 @@ class Logistics(gym.Env):
 
         # decrement steps
         self.remaining_steps -= 1
-        terminated = (self.remaining_steps <= 0) or self._grid_full()
+        terminated = self.remaining_steps <= 0
 
         return self._step_return(reward, terminated, False)
 
