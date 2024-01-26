@@ -8,10 +8,7 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.logger import HParam
 from stable_baselines3.common.monitor import Monitor
 
-from src.config import Model, new_logistics
-
-STEPS = 5_000_000
-N_CPUS = 32
+from src.config import N_ENVS, STEPS, Model, new_logistics
 
 timestamp = int(time.time())
 timestamp_base64 = f"{timestamp:b}"
@@ -33,7 +30,9 @@ def linear_schedule(initial_value: float, final_value: float) -> float:
     return f
 
 
-checkpoint_callback = CheckpointCallback(save_freq=STEPS // 5, save_path=model_dir)
+checkpoint_callback = CheckpointCallback(
+    save_freq=max(STEPS // N_ENVS // 5, 1), save_path=model_dir
+)
 
 
 class HParamCallback(BaseCallback):
@@ -70,7 +69,7 @@ class HParamCallback(BaseCallback):
         return True
 
 
-env = make_vec_env(new_logistics, n_envs=N_CPUS, seed=42)
+env = make_vec_env(new_logistics, n_envs=N_ENVS, seed=42)
 
 model = Model(
     "MultiInputPolicy",
