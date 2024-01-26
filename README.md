@@ -16,7 +16,8 @@ tensorboard --logdir ./data/tb # in another terminal
 
 ## Good Results
 
-Result: -26 to -27.
+Result: -30:
 ```
-./data/model/1706238544-satisfactoriness-tussle
+./data/model/1706238544-satisfactoriness-tussle  # -28
+./data/model/1706242653-jackfish-glecoma # -33
 ```
