@@ -165,7 +165,6 @@ class Logistics(gym.Env):
         # The grid and loading and unloading can each have a palette or be empty
         self.observation_space = gym.spaces.Dict(
             {
-                "remaining_steps": gym.spaces.Discrete(self.n_steps + 1),
                 "grid": gym.spaces.MultiDiscrete(
                     tuple([self.palette_types + 1] * (n_rows * n_cols))
                 ),
@@ -191,7 +190,6 @@ class Logistics(gym.Env):
 
     def _observation(self):
         return {
-            "remaining_steps": self.n_steps,
             "grid": self.grid.ravel(),
             "loading": self.loading.state,
             "unloading": self.unloading.state,
@@ -290,7 +288,7 @@ class Logistics(gym.Env):
         self.remaining_steps -= 1
 
         if self.remaining_steps <= 0:
-            return self._step_return(reward, True, False)
+            return self._step_return(reward, False, True)
 
         # if grid is full, pretend that we penalize for maximum penalty for remaining steps
         if self.early_termination and self._grid_full():
