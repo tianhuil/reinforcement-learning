@@ -4,12 +4,14 @@ from typing import Dict
 from random_word import RandomWords
 from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
 from stable_baselines3.common.env_checker import check_env
+from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.logger import HParam
 from stable_baselines3.common.monitor import Monitor
 
 from src.config import Model, new_logistics
 
-STEPS = 2_000_000
+STEPS = 5_000_000
+N_CPUS = 32
 
 timestamp = int(time.time())
 timestamp_base64 = f"{timestamp:b}"
@@ -21,6 +23,7 @@ model_dir = f"./data/model/{id_str}"
 env = new_logistics()
 check_env(env)
 env = Monitor(env, log_dir, allow_early_resets=True)
+parameters = env.parameters()
 
 
 def linear_schedule(initial_value: float, final_value: float) -> float:
@@ -45,7 +48,7 @@ class HParamCallback(BaseCallback):
                 "optimizer_kwargs_" + key: value
                 for key, value in self.model.policy_kwargs["optimizer_kwargs"].items()
             },
-            **env.parameters(),
+            **parameters,
         }
         if isinstance(
             self.model.learning_rate, float
@@ -66,6 +69,8 @@ class HParamCallback(BaseCallback):
     def _on_step(self) -> bool:
         return True
 
+
+env = make_vec_env(new_logistics, n_envs=N_CPUS, seed=42)
 
 model = Model(
     "MultiInputPolicy",
