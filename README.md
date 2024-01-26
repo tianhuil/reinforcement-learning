@@ -20,4 +20,5 @@ Result: -30:
 ```
 ./data/model/1706238544-satisfactoriness-tussle  # -28
 ./data/model/1706242653-jackfish-glecoma # -33
+./data/model/1706282014-ogdoads-parabranchiat # -29
 ```
