@@ -9,7 +9,7 @@ from stable_baselines3.common.monitor import Monitor
 
 from src.config import Model, new_logistics
 
-STEPS = 1_00_000
+STEPS = 2_000_000
 
 timestamp = int(time.time())
 timestamp_base64 = f"{timestamp:b}"
