@@ -295,7 +295,7 @@ class Logistics(gym.Env):
             future_reward = (
                 self.loading.max_reward() + self.unloading.max_reward()
             ) * self.remaining_steps
-            return self._step_return(reward + future_reward, True, False)
+            return self._step_return(reward + future_reward, False, True)
 
         return self._step_return(reward, False, False)
 
