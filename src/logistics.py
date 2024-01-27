@@ -264,7 +264,7 @@ class Logistics(gym.Env):
             unloading_indices = [
                 np.array([self.unloading_row, i]) for i in _unloading_indices
             ]
-            palette_indices = np.where(self.grid == palette_type)[0]
+            palette_indices = list(zip(*np.where(self.grid == palette_type)))
 
             # Manhattan distance
             distances = np.array(
@@ -273,11 +273,12 @@ class Logistics(gym.Env):
                     for p_index in palette_indices
                 ]
             )
+
             if distances.size == 0:
                 continue
 
             distances = distances.min(axis=1)
-            assert distances.size == palette_indices.size
+            assert distances.size == len(palette_indices)
             penalty += SMALL * distances.sum()
 
         return -penalty
