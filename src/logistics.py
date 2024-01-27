@@ -257,6 +257,31 @@ class Logistics(gym.Env):
         dist = counts / counts.sum() if counts.sum() > 0 else np.zeros_like(counts)
         self.unloading.generate_palettes(dist=dist)
 
+    def _shaping_reward(self):
+        penalty = 0.0
+        for palette_type in range(1, self.palette_types + 1):
+            _unloading_indices = np.where(self.unloading.state == palette_type)[0]
+            unloading_indices = [
+                np.array([self.unloading_row, i]) for i in _unloading_indices
+            ]
+            palette_indices = np.where(self.grid == palette_type)[0]
+
+            # Manhattan distance
+            distances = np.array(
+                [
+                    [np.abs(u_index - p_index).sum() for u_index in unloading_indices]
+                    for p_index in palette_indices
+                ]
+            )
+            if distances.size == 0:
+                continue
+
+            distances = distances.min(axis=1)
+            assert distances.size == palette_indices.size
+            penalty += SMALL * distances.sum()
+
+        return -penalty
+
     def step(self, action):
         reward = 0.0
 
@@ -289,6 +314,7 @@ class Logistics(gym.Env):
             reward -= MEDIUM
 
         self._generate_loading_unloading_palettes()
+        reward += self._shaping_reward()
 
         # decrement steps
         self.remaining_steps -= 1
