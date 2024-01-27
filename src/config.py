@@ -2,7 +2,7 @@ from stable_baselines3 import A2C
 
 from src.logistics import Logistics
 
-STEPS = 5_000_000
+STEPS = 30_000_000
 N_ENVS = 16
 
 
@@ -13,8 +13,8 @@ def new_logistics():
         palette_types=2,
         prob_loading=0.2,
         prob_unloading=0.3,
-        n_steps=30,
-        early_termination=False,
+        n_steps=50,
+        early_termination=True,
     )
 
 
