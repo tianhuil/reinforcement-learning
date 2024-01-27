@@ -5,7 +5,8 @@ import gymnasium as gym
 import numpy as np
 
 LARGE = 1
-SMALL = 1e-1
+MEDIUM = 1e-2
+SMALL = 1e-4
 
 
 def has_palette(arr: np.ndarray | int):
@@ -240,6 +241,22 @@ class Logistics(gym.Env):
     def _grid_full(self) -> bool:
         return bool(has_palette(self.grid).sum() == self.n_rows * self.n_cols)
 
+    def _generate_loading_unloading_palettes(self):
+        # Generate Loading Palettes
+        flat_dist = np.ones([self.palette_types]) / self.palette_types
+        self.loading.generate_palettes(dist=flat_dist)
+
+        # Generate Unloading Palettes
+        counts = np.maximum(
+            0,
+            (
+                np.bincount(self.grid.ravel(), minlength=self.palette_types + 1)
+                - np.bincount(self.unloading.state, minlength=self.palette_types + 1)
+            )[1:],
+        )
+        dist = counts / counts.sum() if counts.sum() > 0 else np.zeros_like(counts)
+        self.unloading.generate_palettes(dist=dist)
+
     def step(self, action):
         reward = 0.0
 
@@ -267,24 +284,11 @@ class Logistics(gym.Env):
             self.grid[dest_x, dest_y] = destination
 
             if not success:
-                reward -= SMALL
+                reward -= MEDIUM
         else:
-            reward -= SMALL
+            reward -= MEDIUM
 
-        # Generate Loading Palettes
-        flat_dist = np.ones([self.palette_types]) / self.palette_types
-        self.loading.generate_palettes(dist=flat_dist)
-
-        # Generate Unloading Palettes
-        counts = np.maximum(
-            0,
-            (
-                np.bincount(self.grid.ravel(), minlength=self.palette_types + 1)
-                - np.bincount(self.unloading.state, minlength=self.palette_types + 1)
-            )[1:],
-        )
-        dist = counts / counts.sum() if counts.sum() > 0 else np.zeros_like(counts)
-        self.unloading.generate_palettes(dist=dist)
+        self._generate_loading_unloading_palettes()
 
         # decrement steps
         self.remaining_steps -= 1
