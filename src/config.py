@@ -14,7 +14,7 @@ def new_logistics():
         prob_loading=0.2,
         prob_unloading=0.3,
         n_steps=50,
-        early_termination=True,
+        early_termination=False,
     )
 
 
