@@ -246,13 +246,12 @@ class Logistics(gym.Env):
         dist = counts / counts.sum() if counts.sum() > 0 else np.zeros_like(counts)
         self.unloading.generate_palettes(dist=dist)
 
-    def _shaping_reward(self):
+    def _shaping_reward_loading(self):
+        return -SMALL * has_palette(self.grid[self.loading_row, :]).sum()
+
+    def _shaping_reward_unloading(self):
         penalty = 0.0
 
-        # move palette away from loading
-        penalty += SMALL * has_palette(self.grid[self.loading_row, :]).sum()
-
-        # move palettes towards unloading
         for palette_type in range(1, self.palette_types + 1):
             _unloading_indices = np.where(self.unloading.state == palette_type)[0]
             unloading_indices = [
@@ -276,6 +275,9 @@ class Logistics(gym.Env):
             penalty += SMALL * distances.sum()
 
         return -penalty
+
+    def _shaping_reward(self):
+        return self._shaping_reward_loading() + self._shaping_reward_unloading()
 
     def step(self, action):
         reward = 0.0

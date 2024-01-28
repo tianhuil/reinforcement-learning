@@ -23,7 +23,7 @@ def test_check_env():
     check_env(env, skip_render_check=True)
 
 
-def compute_shaping_reward(unloading: np.ndarray, grid: np.ndarray) -> float:
+def build_env(unloading: np.ndarray, grid: np.ndarray) -> Logistics:
     """
     Compute the shaping reward for the given unloading state and grid.
 
@@ -38,48 +38,58 @@ def compute_shaping_reward(unloading: np.ndarray, grid: np.ndarray) -> float:
     env = Logistics(n_rows=n_rows, n_cols=n_cols, palette_types=palette_types)
     env.unloading.state = unloading
     env.grid = grid
-    return env._shaping_reward()
+    return env
 
 
-def test_shaping_reward_simple():
-    assert (
-        compute_shaping_reward(
-            np.array([0, 1, 0, 0]),
-            np.array([[0, 0, 0, 0], [0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0]]),
-        )
-        == -1 * SMALL
+def test_shaping_reward_unload_simple():
+    env = build_env(
+        np.array([0, 1, 0, 0]),
+        np.array([[0, 0, 0, 0], [0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0]]),
     )
+    assert env._shaping_reward_unloading() == -1 * SMALL
 
-    assert (
-        compute_shaping_reward(
-            np.array([0, 1, 0, 0]),
-            np.array([[0, 0, 0, 0], [0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]),
-        )
-        == -2 * SMALL
+    env = build_env(
+        np.array([0, 1, 0, 0]),
+        np.array([[0, 0, 0, 0], [0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]),
     )
+    assert env._shaping_reward_unloading() == -2 * SMALL
 
-    assert (
-        compute_shaping_reward(
-            np.array([0, 2, 0, 0]),
-            np.array([[0, 0, 0, 0], [0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0]]),
-        )
-        == -2 * SMALL
+    env = build_env(
+        np.array([0, 2, 0, 0]),
+        np.array([[0, 0, 0, 0], [0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0]]),
     )
+    assert env._shaping_reward_unloading() == -2 * SMALL
 
 
-def test_shaping_reward_multiple():
-    assert (
-        compute_shaping_reward(
-            np.array([0, 2, 0, 0]),
-            np.array([[0, 0, 0, 0], [0, 2, 0, 0], [2, 0, 0, 0], [0, 0, 1, 0]]),
-        )
-        == -4 * SMALL
+def test_shaping_reward_unload_multiple():
+    env = build_env(
+        np.array([0, 2, 0, 0]),
+        np.array([[0, 0, 0, 0], [0, 2, 0, 0], [2, 0, 0, 0], [0, 0, 1, 0]]),
     )
+    assert env._shaping_reward_unloading() == -4 * SMALL
 
-    assert (
-        compute_shaping_reward(
-            np.array([0, 2, 0, 1]),
-            np.array([[0, 0, 0, 0], [0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0]]),
-        )
-        == -3 * SMALL
+    env = build_env(
+        np.array([0, 2, 0, 1]),
+        np.array([[0, 0, 0, 0], [0, 2, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0]]),
     )
+    assert env._shaping_reward_unloading() == -3 * SMALL
+
+
+def test_shaping_reward_loading():
+    env = build_env(
+        np.array([0, 0, 0, 0]),
+        np.array([[0, 0, 0, 0], [0, 2, 0, 0], [2, 0, 0, 0], [0, 0, 1, 0]]),
+    )
+    assert env._shaping_reward_loading() == 0.0
+
+    env = build_env(
+        np.array([0, 0, 0, 0]),
+        np.array([[1, 0, 0, 0], [0, 2, 0, 0], [2, 0, 0, 0], [0, 0, 1, 0]]),
+    )
+    assert env._shaping_reward_loading() == -1 * SMALL
+
+    env = build_env(
+        np.array([0, 0, 0, 0]),
+        np.array([[0, 1, 0, 1], [0, 2, 0, 0], [2, 0, 0, 0], [0, 0, 1, 0]]),
+    )
+    assert env._shaping_reward_loading() == -2 * SMALL
