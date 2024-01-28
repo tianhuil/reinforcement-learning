@@ -324,8 +324,11 @@ class Logistics(gym.Env):
         return self._step_return(reward, False, False)
 
     @staticmethod
-    def _row_string(row):
-        return " ".join([chr(x + 96) if has_palette(x) else "." for x in row])
+    def _row_string(row, uppercase=True):
+        row = " ".join([chr(x + 96) if has_palette(x) else "." for x in row])
+        if uppercase:
+            return row.upper()
+        return row
 
     @staticmethod
     def render_action(action):
@@ -339,7 +342,7 @@ class Logistics(gym.Env):
         print("Loading:   ", self._row_string(self.loading.state))
         for row in range(self.n_rows):
             print("Grid:      ", self._row_string(self.grid[row, :]))
-        print("Unloading: ", self._row_string(self.unloading.state))
+        print("Unloading: ", self._row_string(self.unloading.state, uppercase=False))
 
     def parameters(self) -> Dict[str, Any]:
         return {
