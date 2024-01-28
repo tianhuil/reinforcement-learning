@@ -257,6 +257,11 @@ class Logistics(gym.Env):
 
     def _shaping_reward(self):
         penalty = 0.0
+
+        # move palette away from loading
+        penalty += SMALL * has_palette(self.grid[self.loading_row, :]).sum()
+
+        # move palettes towards unloading
         for palette_type in range(1, self.palette_types + 1):
             _unloading_indices = np.where(self.unloading.state == palette_type)[0]
             unloading_indices = [
