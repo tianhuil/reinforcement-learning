@@ -51,14 +51,8 @@ class Port(ABC):
         self.state = np.zeros((self.size,), dtype=np.int_)
 
     @abstractmethod
-    def step(self, grid_cell: np.ndarray) -> np.ndarray:
+    def step(self, grid_cell: np.ndarray) -> tuple[np.ndarray, float]:
         pass
-
-    def reward(self):
-        return -1 * has_palette(self.state).sum() * LARGE
-
-    def max_reward(self):
-        return -1 * self.size * LARGE
 
     def _generate_palette(self, old_palette: int, dist: np.ndarray) -> int:
         """
@@ -86,12 +80,14 @@ class Port(ABC):
 
 
 class Loading(Port):
-    def step(self, grid_cell: np.ndarray) -> np.ndarray:
+    def step(self, grid_cell: np.ndarray) -> tuple[np.ndarray, float]:
+        reward = 0.0
         for k in range(self.size):
-            origin, destination, _ = move_palette(self.state[k], grid_cell[k])
+            origin, destination, success = move_palette(self.state[k], grid_cell[k])
             self.state[k] = origin
             grid_cell[k] = destination
-        return grid_cell
+            reward += LARGE if success else 0
+        return grid_cell, reward
 
 
 class Unloading(Port):
@@ -107,12 +103,14 @@ class Unloading(Port):
             return origin, destination, False
         return 0, 0, True
 
-    def step(self, grid_cell: np.ndarray) -> np.ndarray:
+    def step(self, grid_cell: np.ndarray) -> tuple[np.ndarray, float]:
+        reward = 0.0
         for k in range(self.size):
-            origin, destination, _ = self.unload(grid_cell[k], self.state[k])
+            origin, destination, success = self.unload(grid_cell[k], self.state[k])
             self.state[k] = destination
             grid_cell[k] = origin
-        return grid_cell
+            reward += LARGE if success else 0
+        return grid_cell, reward
 
 
 class Logistics(gym.Env):
@@ -287,16 +285,16 @@ class Logistics(gym.Env):
         reward = 0.0
 
         # Load palettes if we can, penalty if not
-        self.grid[self.loading_row, :] = self.loading.step(
+        self.grid[self.loading_row, :], loading_reward = self.loading.step(
             self.grid[self.loading_row, :]
         )
-        reward += self.loading.reward()
+        reward += loading_reward
 
         # Unload palettes if we can, penalty if not
-        self.grid[self.unloading_row, :] = self.unloading.step(
+        self.grid[self.unloading_row, :], unloading_reward = self.unloading.step(
             self.grid[self.unloading_row, :]
         )
-        reward += self.unloading.reward()
+        reward += unloading_reward
 
         # Move palette based on action
         orig_x, orig_y, direction = action
@@ -325,10 +323,7 @@ class Logistics(gym.Env):
 
         # if grid is full, pretend that we penalize for maximum penalty for remaining steps
         if self.early_termination and self._grid_full():
-            future_reward = (
-                self.loading.max_reward() + self.unloading.max_reward()
-            ) * self.remaining_steps
-            return self._step_return(reward + future_reward, False, True)
+            return self._step_return(reward, False, True)
 
         return self._step_return(reward, False, False)
 

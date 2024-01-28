@@ -3,7 +3,7 @@ from stable_baselines3 import A2C
 from src.logistics import Logistics
 
 STEPS = 30_000_000
-N_ENVS = 16
+N_ENVS = 32
 
 
 def new_logistics():

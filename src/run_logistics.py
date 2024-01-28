@@ -30,7 +30,13 @@ def run_logistics_with_model(model_dir: str | None, input_advance: bool = True):
         print(f"Step {step + 1}")
         obs, reward, terminated, truncated, info = env.step(action)
         done = terminated or truncated
-        print("action=", env.render_action(action), "reward=", reward, "done=", done)
+        print(
+            "action={}".format(
+                env.render_action(action),
+            ),
+            "reward={: 1.6f}".format(reward),
+            "done={}".format(done),
+        )
         env.render()
         if done:
             env.reset()
