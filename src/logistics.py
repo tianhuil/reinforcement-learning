@@ -174,11 +174,20 @@ class Logistics(gym.Env):
 
         self._reset()
 
+    def _reset_populate_row(self, prob=0.5):
+        return np.random.choice(
+            range(1, self.palette_types + 1), size=self.n_cols
+        ) * np.random.choice([0, 1], size=self.n_cols, p=[1 - prob, prob])
+
     def _reset(self):
         self.grid = np.zeros((self.n_rows, self.n_cols), dtype=np.int_)
         self.loading.reset()
         self.unloading.reset()
         self.remaining_steps = self.n_steps
+
+        # set up palettes in bottom row with high probability
+        self.grid[self.unloading_row, :] = self._reset_populate_row(prob=0.5)
+        self.unloading.state = self._reset_populate_row(prob=0.5)
 
     def _observation(self):
         return {
