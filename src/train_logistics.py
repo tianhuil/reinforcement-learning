@@ -7,6 +7,7 @@ from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.logger import HParam
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import SubprocVecEnv
 
 from src.config import N_ENVS, STEPS, Model, new_logistics
 
@@ -69,16 +70,18 @@ class HParamCallback(BaseCallback):
         return True
 
 
-env = make_vec_env(new_logistics, n_envs=N_ENVS, seed=42)
+if __name__ == "__main__":
+    env = make_vec_env(new_logistics, n_envs=N_ENVS, seed=42, vec_env_cls=SubprocVecEnv)
 
-model = Model(
-    "MultiInputPolicy",
-    env,
-    verbose=1,
-    tensorboard_log=log_dir,
-    learning_rate=linear_schedule(1e-3, 1e-5),
-).learn(
-    STEPS,
-    callback=[checkpoint_callback, HParamCallback()],
-)
-print(f"Model saved under {model_dir}")
+    model = Model(
+        "MultiInputPolicy",
+        env,
+        verbose=1,
+        tensorboard_log=log_dir,
+        learning_rate=1e-3,
+    ).learn(
+        STEPS,
+        callback=[checkpoint_callback, HParamCallback()],
+    )
+
+    print(f"Model saved under {model_dir}")
