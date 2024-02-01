@@ -37,7 +37,11 @@ def run_logistics_with_model(model_dir: str | None, input_advance: bool = True):
             "reward={: 1.6f}".format(reward),
             "done={}".format(done),
         )
+
+        print("")
         env.render()
+        print("")
+
         if done:
             env.reset()
 
