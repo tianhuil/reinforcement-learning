@@ -286,6 +286,21 @@ class Logistics(gym.Env):
     def _shaping_reward(self):
         return self._shaping_reward_loading() + self._shaping_reward_unloading()
 
+    def _move_palette(self, action) -> float:
+        orig_x, orig_y, direction = action
+        dest_x, dest_y = self._destination(orig_x, orig_y, direction)
+
+        if not self.valid_coords(dest_x, dest_y):
+            return -1 * MEDIUM
+
+        origin, destination, success = move_palette(
+            self.grid[orig_x, orig_y], self.grid[dest_x, dest_y]
+        )
+        self.grid[orig_x, orig_y] = origin
+        self.grid[dest_x, dest_y] = destination
+
+        return 0.0 if success else -1 * MEDIUM
+
     def step(self, action):
         reward = 0.0
 
@@ -301,28 +316,16 @@ class Logistics(gym.Env):
         )
         reward += unloading_reward
 
-        # Move palette based on action
-        orig_x, orig_y, direction = action
-        dest_x, dest_y = self._destination(orig_x, orig_y, direction)
-
-        if self.valid_coords(dest_x, dest_y):
-            origin, destination, success = move_palette(
-                self.grid[orig_x, orig_y], self.grid[dest_x, dest_y]
-            )
-            self.grid[orig_x, orig_y] = origin
-            self.grid[dest_x, dest_y] = destination
-
-            if not success:
-                reward -= MEDIUM
-        else:
-            reward -= MEDIUM
+        reward += self._move_palette(action)
 
         self._generate_loading_unloading_palettes()
+
         reward += self._shaping_reward()
 
         # decrement steps
         self.remaining_steps -= 1
 
+        # if we are out of steps, terminate
         if self.remaining_steps <= 0:
             return self._step_return(reward, False, True)
 
