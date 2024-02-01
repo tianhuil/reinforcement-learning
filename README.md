@@ -27,3 +27,9 @@ Result for 4x4x4:
 ```
 1706462314-regive-prodromatic/A2C_1  # 23
 ```
+
+Result
+```
+1706754719-oaks-filicin/A2C_1  # 24
+1706729266-revisionist-unallegorical/A2C_1  # 25
+```
